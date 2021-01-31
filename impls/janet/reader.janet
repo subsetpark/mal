@@ -45,18 +45,19 @@
      (let ,(mapcat |[$ '(read-form reader)] forms)
        ,exp)))
 
-(defreader deref [form] [:parens ["deref" form]])
-(defreader quote [form] [:parens ["quote" form]])
-(defreader quasiquote [form] [:parens ["quasiquote" form]])
-(defreader unquote [form] [:parens ["unquote" form]])
-(defreader splice-unquote [form] [:parens ["splice-unquote" form]])
-(defreader with-meta [meta form] [:parens ["with-meta" form meta]])
+(defreader deref [form] [:parens ['deref form]])
+(defreader quote [form] [:parens ['quote form]])
+(defreader quasiquote [form] [:parens ['quasiquote form]])
+(defreader unquote [form] [:parens ['unquote form]])
+(defreader splice-unquote [form] [:parens ['splice-unquote form]])
+(defreader with-meta [meta form] [:parens ['with-meta form meta]])
 
 #
 # Reading
 #
 
 (def- quote-byte (chr "\""))
+(def- colon-byte (chr ":"))
 
 (defn read-atom [reader]
   (let [tok (:next reader)]
@@ -65,8 +66,10 @@
       "]" :rb
       "}" :rc
       (str (= quote-byte (first str)) (not= quote-byte (last str))) (error :endquote)
+      (str (= quote-byte (first str))) tok
+      (str (= colon-byte (first str))) (keyword (string/slice tok 1))
       _ (match (scan-number tok)
-          nil tok
+          nil (symbol tok)
           num num))))
 
 
@@ -92,22 +95,14 @@
   (def end->type {:rp :parens :rb :brackets :rc :curly})
   (defn do-read-list [reader acc]
     (match (read-form reader)
-      :eof (error :parens)
+      :eof (error [:eof end])
       (sym (= end sym)) [(end->type end) acc]
-      (sym (keyword? sym)) (error [:mismatch end sym])
+      (sym (or (= :rp sym) (= :rc sym) (= :rb sym))) (error [:mismatch end sym])
       form (do-read-list reader (array/push acc form))))
   (do-read-list reader @[]))
 
 (defn read-str [str]
-  (try
-    (-> str
-        (tokenize)
-        (new-reader)
-        (read-form))
-    ([err] (match err
-             :parens "unbalanced parenthesis"
-             :endquote "unbalanced quotation marks"
-             [:mismatch expected got] (string/format "delimiter mismatch: got %q, expected %q"
-                                                     got
-                                                     expected)
-             _ "syntax error"))))
+  (-> str
+      (tokenize)
+      (new-reader)
+      (read-form)))

@@ -8,4 +8,5 @@
     @[:brackets seq] (join "[" "]" seq)
     @[:curly seq] (join "{" "}" seq)
     @[:parens seq] (join "(" ")" seq)
+    (ds (keyword? ds)) (string ":" ds)
     sym (string sym)))
