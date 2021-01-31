@@ -94,7 +94,8 @@ IMPLS = ada ada.2 awk bash basic bbc-basic c chuck clojure coffee common-lisp cp
 	guile haskell haxe hy io java js jq julia kotlin livescript logo lua make mal \
 	matlab miniMAL nasm nim objc objpascal ocaml perl perl6 php picolisp pike plpgsql \
 	plsql powershell ps python python.2 r racket rexx rpython ruby rust scala scheme skew \
-	swift swift3 swift4 swift5 tcl ts vala vb vhdl vimscript wasm wren yorick xslt zig
+	swift swift3 swift4 swift5 tcl ts vala vb vhdl vimscript wasm wren yorick xslt zig \
+        janet
 
 EXTENSION = .mal
 
@@ -164,6 +165,8 @@ xslt_TEST_OPTS = --test-timeout 120
 #
 # Implementation specific utility functions
 #
+
+janet_STEP_TO_PROG              = impls/janet/$($(1)).janet
 
 basic_STEP_TO_PROG_cbm          = impls/basic/$($(1)).bas
 basic_STEP_TO_PROG_qbasic       = impls/basic/$($(1))
