@@ -1,6 +1,9 @@
-(defn READ [x] x)
+(import /reader)
+(import /printer)
+
+(defn READ [x] (reader/read-str x))
 (defn EVAL [x] x)
-(defn PRINT [x] x)
+(defn PRINT [x] (printer/print-str x))
 
 (defn rep [x]
   (-> x
@@ -9,9 +12,8 @@
       (PRINT)))
 
 (forever
-  # MAL test suite doesn't recognize the prompt as output; `prin`
-  # directly.
-  (prin "user> ")
+  (:write (dyn :out stdout) "user> ")
+  (flush)
   (let [input (getline)]
     (cond
       (= (length input) 0) (os/exit 0)
